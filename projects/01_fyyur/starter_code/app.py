@@ -11,6 +11,7 @@ from flask_sqlalchemy import SQLAlchemy
 import logging
 from logging import Formatter, FileHandler
 from flask_wtf import Form
+from sqlalchemy.orm import backref
 from forms import *
 from flask_migrate import Migrate
 #----------------------------------------------------------------------------#
@@ -28,7 +29,12 @@ migrate = Migrate(app, db)
 #----------------------------------------------------------------------------#
 # Models.
 #----------------------------------------------------------------------------#
-
+Show = db.Table('Show',
+  db.Column('venue_id',db.Integer,db.ForeignKey('Venue.id'),primary_key=True),
+  db.Column('artist_id',db.Integer,db.ForeignKey('Artist.id'),primary_key=True),
+  db.Column('start_time',db.DateTime, nullable=False,
+        default=datetime.utcnow)
+) 
 class Venue(db.Model):
     __tablename__ = 'Venue'
 
@@ -44,6 +50,7 @@ class Venue(db.Model):
     website_link= db.Column(db.String(500))
     looking_for_talent= db.Column(db.Boolean,default=False)
     seeking_desc= db.Column(db.String())
+    artists = db.relationship('Artist',secondary=Show,backref=db.backref('venues',lazy=True))
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
 class Artist(db.Model):
@@ -63,7 +70,6 @@ class Artist(db.Model):
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
-
 #----------------------------------------------------------------------------#
 # Filters.
 #----------------------------------------------------------------------------#
