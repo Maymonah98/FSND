@@ -57,7 +57,7 @@ class Artist(db.Model):
     __tablename__ = 'Artist'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
+    name = db.Column(db.String())
     city = db.Column(db.String(120))
     state = db.Column(db.String(120))
     phone = db.Column(db.String(120))
@@ -67,6 +67,11 @@ class Artist(db.Model):
     website_link= db.Column(db.String(500))
     looking_for_venues= db.Column(db.Boolean,default=False)
     seeking_desc= db.Column(db.String())
+
+class Genres(db.Model):
+  __tablename__='genres'
+  id = db.Column(db.Integer, primary_key=True)
+  name = db.Column(db.String)
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
@@ -100,6 +105,8 @@ def index():
 def venues():
   # TODO: replace with real venues data.
   #       num_shows should be aggregated based on number of upcoming shows per venue.
+  # insert into Venue(city,state,id,name)
+
   data=[{
     "city": "San Francisco",
     "state": "CA",
@@ -142,6 +149,9 @@ def search_venues():
 def show_venue(venue_id):
   # shows the venue page with the given venue_id
   # TODO: replace with real venue data from the venues table, using venue_id
+  # insert into Venue(id,name,city,state,address,phone,image_link,facebook_link,genres,website_link,seeking_desc,looking_for_talent)
+  # values (1, "The Musical Hop","San Francisco","CA", "123-123-1234","https://images.unsplash.com/photo-1543900694-133f37abaaa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60",
+  # "https://www.facebook.com/TheMusicalHop",G,"https://www.themusicalhop.com","We are on the lookout for a local artist to play every two weeks. Please call us.", True)
   data1={
     "id": 1,
     "name": "The Musical Hop",
