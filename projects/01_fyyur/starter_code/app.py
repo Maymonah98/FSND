@@ -29,33 +29,32 @@ migrate = Migrate(app, db)
 #----------------------------------------------------------------------------#
 # Models.
 #----------------------------------------------------------------------------#
-Show = db.Table('Show',
-  db.Column('venue_id',db.Integer,db.ForeignKey('Venue.id'),primary_key=True),
-  db.Column('artist_id',db.Integer,db.ForeignKey('Artist.id'),primary_key=True),
+Show = db.Table('show',
+  db.Column('venue_id',db.Integer,db.ForeignKey('venue.id'),primary_key=True),
+  db.Column('artist_id',db.Integer,db.ForeignKey('artist.id'),primary_key=True),
   db.Column('start_time',db.DateTime, nullable=False,
         default=datetime.utcnow)
 ) 
 class Venue(db.Model):
-    __tablename__ = 'Venue'
+    __tablename__ = 'venue'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
+    name = db.Column(db.String())
     city = db.Column(db.String(120))
     state = db.Column(db.String(120))
     address = db.Column(db.String(120))
     phone = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
-    genres = db.Column(db.String())
+    genres = db.relationship("genres",backref=db.backref('venue',lazy=True))
     website_link= db.Column(db.String(500))
     looking_for_talent= db.Column(db.Boolean,default=False)
     seeking_desc= db.Column(db.String())
-    artists = db.relationship('Artist',secondary=Show,backref=db.backref('venues',lazy=True))
+    artists = db.relationship('artist',secondary=Show,backref=db.backref('venue',lazy=True))
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
 class Artist(db.Model):
-    __tablename__ = 'Artist'
-
+    __tablename__ = 'artist'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String())
     city = db.Column(db.String(120))
@@ -72,6 +71,7 @@ class Genres(db.Model):
   __tablename__='genres'
   id = db.Column(db.Integer, primary_key=True)
   name = db.Column(db.String)
+  venue_id= db.Column(db.Integer,db.ForeignKey(Venue.id))
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
@@ -105,8 +105,6 @@ def index():
 def venues():
   # TODO: replace with real venues data.
   #       num_shows should be aggregated based on number of upcoming shows per venue.
-  # insert into Venue(city,state,id,name)
-
   data=[{
     "city": "San Francisco",
     "state": "CA",
@@ -149,9 +147,9 @@ def search_venues():
 def show_venue(venue_id):
   # shows the venue page with the given venue_id
   # TODO: replace with real venue data from the venues table, using venue_id
-  # insert into Venue(id,name,city,state,address,phone,image_link,facebook_link,genres,website_link,seeking_desc,looking_for_talent)
+  # insert into Venue(id,name,city,state,address,phone,image_link,facebook_link,website_link,seeking_desc,looking_for_talent)
   # values (1, "The Musical Hop","San Francisco","CA", "123-123-1234","https://images.unsplash.com/photo-1543900694-133f37abaaa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60",
-  # "https://www.facebook.com/TheMusicalHop",G,"https://www.themusicalhop.com","We are on the lookout for a local artist to play every two weeks. Please call us.", True)
+  # "https://www.facebook.com/TheMusicalHop",,"https://www.themusicalhop.com","We are on the lookout for a local artist to play every two weeks. Please call us.", True)
   data1={
     "id": 1,
     "name": "The Musical Hop",
