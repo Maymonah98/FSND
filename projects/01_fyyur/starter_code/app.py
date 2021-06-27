@@ -39,8 +39,7 @@ class Show(db.Model) :
   _tablename_= 'show'
   venue_id=db.Column(db.Integer,db.ForeignKey('venue.id'),primary_key=True)
   artist_id=db.Column(db.Integer,db.ForeignKey('artist.id'),primary_key=True)
-  start_time=db.Column(db.String(), nullable=False,default=datetime.utcnow)
-  artist=relationship('Artist')
+  start_time=db.Column(db.DateTime, nullable=False,default=datetime.utcnow)
 
 class Venue(db.Model):
     __tablename__ = 'venue'
@@ -57,7 +56,7 @@ class Venue(db.Model):
     website_link= db.Column(db.String(500),nullable=False)
     looking_for_talent= db.Column(db.Boolean,default=False)
     seeking_desc= db.Column(db.String())
-    artists = db.relationship('Show')
+    shows = db.relationship('Show',backref='Venue',lazy=True)
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
 class Artist(db.Model):
@@ -73,7 +72,7 @@ class Artist(db.Model):
     website_link= db.Column(db.String(500))
     looking_for_venues= db.Column(db.Boolean,default=False)
     seeking_desc= db.Column(db.String())
-    # venues = db.relationship('Show',back_populates="venues")
+    shows = db.relationship('Show',backref='Artist',lazy=True)
 
 
 def __repr__(self):
@@ -343,15 +342,15 @@ def show_artist(artist_id):
       "past_shows_count": 1,
       "upcoming_shows_count": 0,
     }
-    # past_shows=Show.query.filter(Show.start_time<=now).all()
-    for past_shows in artists:
-      past_shows={
-        "venue_id": 1,
+    past_shows=Show.query.filter(Show.start_time>=now).all()
+    for past_show in past_shows:
+      pastshow={
+        "venue_id": past_show.venue_id,
         "venue_name": "The Musical Hop",
         "venue_image_link": "https://images.unsplash.com/photo-1543900694-133f37abaaa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60",
         "start_time": "2019-05-21T21:30:00.000Z"
       }
-    data["past_shows"].append(past_shows)
+      data["past_shows"].append(pastshow)
     for upcoming_shows in artists:
       upcoming_shows= {
       "venue_id": 3,
@@ -476,12 +475,12 @@ def shows():
   data=[]
   for show in shows:
       d={
-        "start_time": show.start_time,
+        "start_time": format_datetime(str(show.start_time)),
         "venue_id": show.venue_id,
-        # "venue_name": show.venue_name,
+        "venue_name": show.venue.name,
         "artist_id": show.artist_id,
-        # "artist_name": artist_info.name,
-        # "artist_image_link": artist_info.image_link,
+        "artist_name": show.artist.name,
+        "artist_image_link": show.artist.image_link,
       }
       data.append(d)
   # , {
