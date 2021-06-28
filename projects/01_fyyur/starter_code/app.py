@@ -13,7 +13,7 @@ import logging
 from logging import Formatter, FileHandler
 from flask_wtf import Form
 from sqlalchemy.orm import backref, relationship
-from sqlalchemy.sql.sqltypes import ARRAY
+from sqlalchemy.sql.sqltypes import ARRAY, DateTime
 from forms import *
 from flask_migrate import Migrate
 import sys
@@ -173,6 +173,7 @@ def search_venues():
 def show_venue(venue_id):
   # shows the venue page with the given venue_id
   # TODO: replace with real venue data from the venues table, using venue_id
+  now = datetime.utcnow()
   venues= Venue.query.filter_by(id=venue_id).all()
   for venue in venues:
     data = {
@@ -193,22 +194,24 @@ def show_venue(venue_id):
       "past_shows_count": 1,
       "upcoming_shows_count": 1,
     }
-    for past_shows in venues:
-      past_shows={
-        "artist_id": 5,
-        "artist_name": "Matt Quevedo",
-        "artist_image_link": "https://images.unsplash.com/photo-1495223153807-b916f75de8c5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80",
-        "start_time": "2019-06-15T23:00:00.000Z"
+    past_shows= Show.query.filter(Show.start_time <= now).filter(venue.id==Show.venue_id)
+    for past_show in past_shows:
+      past_show={
+        "artist_id": past_show.artist_id,
+        "artist_name": past_show.artist.name,
+        "artist_image_link": past_show.artist.image_link,
+        "start_time": format_datetime(str(past_show.start_time))
       }
-      data['past_shows'].append(past_shows)
-    for upcoming_shows in venues:
-      upcoming_shows={
-        "artist_id": 6,
-        "artist_name": "The Wild Sax Band",
-        "artist_image_link": "https://images.unsplash.com/photo-1558369981-f9ca78462e61?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=794&q=80",
-        "start_time": "2035-04-01T20:00:00.000Z"
+      data['past_shows'].append(past_show)
+    upcoming_shows = Show.query.filter(Show.start_time>=now).filter(venue.id==Show.venue_id)
+    for upcoming_show in upcoming_shows:
+      upcoming_show={
+        "artist_id": upcoming_show.artist_id,
+        "artist_name": upcoming_show.artist.name,
+        "artist_image_link": upcoming_show.artist.image_link,
+        "start_time": format_datetime(str(upcoming_show.start_time))
       }
-      data["upcoming_shows"].append(upcoming_shows)
+      data["upcoming_shows"].append(upcoming_show)
 
         
     #   "past_shows": [{
@@ -322,7 +325,7 @@ def show_artist(artist_id):
   # shows the artist page with the given artist_id
   # TODO: replace with real artist data from the artist table, using artist_id
   data={}
-  now= datetime.utcnow()
+  now = datetime.utcnow()
   artists= Artist.query.filter_by(id=artist_id).all()
   for artist in artists:
     data={
@@ -342,23 +345,24 @@ def show_artist(artist_id):
       "past_shows_count": 1,
       "upcoming_shows_count": 0,
     }
-    past_shows=Show.query.filter(Show.start_time>=now).all()
+    past_shows=Show.query.filter(Show.start_time<=now).filter(artist.id==Show.artist_id)
     for past_show in past_shows:
-      pastshow={
+      past_show={
         "venue_id": past_show.venue_id,
-        "venue_name": "The Musical Hop",
-        "venue_image_link": "https://images.unsplash.com/photo-1543900694-133f37abaaa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60",
-        "start_time": "2019-05-21T21:30:00.000Z"
+        "venue_name": past_show.venue.name,
+        "venue_image_link": past_show.venue.image_link,
+        "start_time": format_datetime(str(past_show.start_time))
       }
-      data["past_shows"].append(pastshow)
-    for upcoming_shows in artists:
-      upcoming_shows= {
-      "venue_id": 3,
-      "venue_name": "Park Square Live Music & Coffee",
-      "venue_image_link": "https://images.unsplash.com/photo-1485686531765-ba63b07845a7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=747&q=80",
-      "start_time": "2035-04-01T20:00:00.000Z"
+      data["past_shows"].append(past_show)
+    upcoming_shows = Show.query.filter(Show.start_time>=now).filter(artist.id==Show.artist_id)
+    for upcoming_show in upcoming_shows:
+      upcoming_show= {
+      "venue_id": upcoming_show.venue_id,
+      "venue_name": upcoming_show.venue.name,
+      "venue_image_link": upcoming_show.venue.image_link,
+      "start_time": format_datetime(str(upcoming_show.start_time))
     }
-    data["upcoming_shows"].append(upcoming_shows)
+      data["upcoming_shows"].append(upcoming_show)
     
   return render_template('pages/show_artist.html', artist=data)
 
