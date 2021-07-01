@@ -228,10 +228,11 @@ def create_venue_submission():
       facebook_link=request.form['facebook_link']
       image_link=request.form['image_link']
       website_link=request.form['website_link']
-      seeking_Talent=request.form['seeking_talent']
+      seeking_Talent=True if 'seeking_talent' in request.form else False
       seeking_description=request.form['seeking_description']
       data= Venue(name= name,city=city,state=state,address=address,phone=phone,genres=genres,facebook_link=facebook_link,
-                  image_link=image_link,website_link=website_link,looking_for_talent=seeking_Talent,
+                  image_link=image_link,website_link=website_link,
+                  looking_for_talent=seeking_Talent,
                   seeking_desc=seeking_description)
       db.session.add(data)
       db.session.commit()
@@ -363,7 +364,7 @@ def edit_artist_submission(artist_id):
   artist.facebook_link=request.form['facebook_link']
   artist.image_link=request.form['image_link']
   artist.website_link=request.form['website_link']
-  artist.seeking_venue=request.form['seeking_venue']
+  artist.seeking_venue=True if 'seeking_venue' in request.form else False
   artist.seeking_desc=request.form['seeking_description']
   db.session.commit()
 
@@ -394,11 +395,9 @@ def edit_venue_submission(venue_id):
   venue.image_link=request.form['image_link']
   venue.website_link=request.form['website_link']
   venue.looking_for_talent=True
-  # venue.seeking_Talent=request.form['seeking_talent']
+  venue.seeking_Talent=True if 'seeking_talent' in request.form else False
   venue.seeking_description=request.form['seeking_description']
-  # data= Venue(name= name,city=city,state=state,address=address,phone=phone,genres=genres,facebook_link=facebook_link,
-  #             image_link=image_link,website_link=website_link,looking_for_talent=seeking_Talent,
-  #             seeking_desc=seeking_description)
+
   db.session.commit()
   return redirect(url_for('show_venue', venue_id=venue_id))
 
@@ -425,10 +424,11 @@ def create_artist_submission():
       facebook_link=request.form['facebook_link']
       image_link=request.form['image_link']
       website_link=request.form['website_link']
-      seeking_venue=request.form['seeking_venue']
+      seeking_venue=True if 'seeking_venue' in request.form else False
       seeking_description=request.form['seeking_description']
       data= Artist(name= name,city=city,state=state,phone=phone,genres=genres,facebook_link=facebook_link,
-                  image_link=image_link,website_link=website_link,looking_for_venues=seeking_venue,
+                  image_link=image_link,website_link=website_link,
+                  looking_for_venues=seeking_venue,
                   seeking_desc=seeking_description)
       db.session.add(data)
       db.session.commit()
